@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Copybara",
+  "description": "Copy text to clipboard from anything.",
+  "version": "1.0",
+  "icons": {},
+
+  "background": {
+    "service_worker": "./scripts/background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["./scripts/contentScript.js"],
+      "css": ["./styles/contentScript.css"],
+      "all_frames": false
+    }
+  ],
+
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {}
+  },
+
+  "permissions": ["tabs", "activeTab", "clipboardRead", "storage"],
+
+  "commands": {}
+}
