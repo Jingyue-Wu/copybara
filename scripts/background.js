@@ -1,13 +1,19 @@
 let screenshotUri = null
+let result = null
+let currentCopiedText = null
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.from == "content") {
     console.log("cropped uri recieved:")
     console.log(message.data)
 
-    store("screenshot", message.data)
-
     screenshotUri = message.data
+    ;(async function () {
+      currentCopiedText = await getText(screenshotUri)
+      console.log("text: ", currentCopiedText)
+      // writeToClipboard(currentCopiedText)
+      messageContentScript("text", currentCopiedText)
+    })()
   }
 
   sendResponse({
@@ -33,12 +39,46 @@ async function load(key) {
   })
 }
 
-// ----------------------------------------------------
+async function getText(imageBase64) {
+  const apiKey = ""
+  const url =
+    "https://api.ocr.space/parse/image?language=eng&isOverlayRequired=false"
 
-async function writeToClipboard(text) {
-  try {
-    await navigator.clipboard.writeText(text)
-  } catch (error) {
-    console.log("Error writing to clipboard: " + error.message)
+  let myHeaders = new Headers()
+  myHeaders.append("apikey", apiKey)
+
+  let formdata = new FormData()
+  formdata.append("base64image", imageBase64)
+  formdata.append("scale", "true")
+
+  let requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: formdata,
+    redirect: "follow",
   }
+
+  try {
+    const response = await fetch(url, requestOptions)
+    const result = await response.text()
+    const text = JSON.parse(result).ParsedResults[0].ParsedText
+    console.log(text)
+    return text
+  } catch (error) {
+    console.log("error", error)
+    return {}
+  }
+}
+
+function messageContentScript(key, message) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { from: "background", [key]: message },
+      function (response) {
+        console.log("sent message to content script", response)
+        messageSent = false
+      }
+    )
+  })
 }

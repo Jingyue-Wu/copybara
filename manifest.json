@@ -23,7 +23,13 @@
     "default_icon": {}
   },
 
-  "permissions": ["tabs", "activeTab", "clipboardRead", "storage"],
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "clipboardRead",
+    "clipboardWrite",
+    "storage"
+  ],
 
   "commands": {}
 }

@@ -5,16 +5,25 @@ let screenshotUri = null
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   cursorPos = null
 
+  // Receive command to activate area selection with cursor from popup
   if (request.from == "popup" && request.message == "getCoordinates") {
     console.log("message recieved:")
     console.log(request.message)
-
     getCursor()
-  } else if (request.from == "popup") {
+  }
+
+  // Receive full viewport screenshot from popup
+  else if (request.from == "popup") {
     console.log("uri recieved:")
     console.log(request.message)
     screenshotUri = request.message
   }
+
+  // Receive OCR text from background
+  else if (request.from == "background") {
+    writeToClipboard(request.text)
+  }
+
   sendResponse({ message: "sent successfully to content script" })
 })
 
@@ -100,10 +109,6 @@ function getCursor() {
 
       console.log("sending message to background...")
 
-      // messageBackground(data)
-
-      // setTimeout(() => sendResponse(data), 10)
-
       crop(screenshotUri, data)
     }
   }
@@ -125,17 +130,16 @@ function messageBackground(message) {
 
 function crop(uri, data) {
   const screenshotCanvas = document.createElement("canvas")
-  const context = screenshotCanvas.getContext("2d") //https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
+  const context = screenshotCanvas.getContext("2d")
 
-  // get coordinates of crop (message inejcted content script)
-  // document.getElementById("test").innerHTML = data.start[0]
+  // get coordinates of crop
+
   console.log(data)
 
   let image = new Image()
   image.src = uri
 
   image.onload = () => {
-    // crop
     startX = Math.min(data.start[0], data.end[0])
     startY = Math.min(data.start[1], data.end[1])
 
@@ -167,15 +171,14 @@ function crop(uri, data) {
     console.log(baseUrl)
 
     messageBackground(baseUrl)
+  }
+}
 
-    // ----------------------------------------------------------
-    // store("screenshot", baseUrl)
-
-    // ;(async function () {
-    //   document.getElementById("hi").innerHTML = await load("screenshot")
-    // })()
-
-    // document.getElementById("hi").innerHTML = canvas.toDataURL("image/jpeg")
-    // document.getElementById("bye").innerHTML = data.height + " " + data.width
+async function writeToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text)
+    console.log("writing to clipboard", text)
+  } catch (error) {
+    console.log("Error writing to clipboard: " + error.message)
   }
 }
