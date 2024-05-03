@@ -4,22 +4,64 @@
 // send to the ocr api
 // return text and update into clipboard
 
-// chrome.storage.local.set({ coordinates: {} })
+// chrome.storage.local.set({ coordinates: "bonjour" })
+
+// store("coordinates", "bonjour")
+// ;(async function () {
+//   document.getElementById("test").innerHTML = await load("coordinates")
+// })()
+
+// async function getData() {
+//   document.getElementById("test").innerHTML = await load("coordinates")
+//   console.log(output)
+// }
+
 // chrome.storage.local.get("coordinates", function (response) {
 //   console.log(response)
-//   document.getElementById("test").innerHTML = response.start[0]
+//   document.getElementById("test").innerHTML = response["coordinates"]
 // })
+
+// store("screenshot", "asdfasdfadsf")
+
+;(async function () {
+  const s = await load("screenshot")
+  document.getElementById("hi").innerHTML = s 
+  console.log(s)
+})()
 
 messageSent = false
 
 const button = document.getElementById("button")
 button.addEventListener("click", () => {
+  // store("screenshot", "bruh")
+
+  // ;(async function () {
+  //   document.getElementById("hi").innerHTML = await load("screenshot")
+  // })()
+
   if (!messageSent) {
     getCoordinates()
     messageSent = true
   }
-  // getScreen()
 })
+
+function getCoordinates() {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    mousePos = messageContentScript(tabs[0].id, "getCoordinates")
+  })
+}
+
+function messageContentScript(tabID, message) {
+  console.log("Message sent to content script")
+  chrome.tabs.sendMessage(tabID, { message: message }, function (response) {
+    console.log("Recieved response")
+    // document.getElementById("test").innerHTML = response.msg.start[0]
+    console.log(response.msg.start, response.msg.end)
+
+    getScreen(response.msg)
+    messageSent = false
+  })
+}
 
 // get uri of screenshot image
 function getScreen(data) {
@@ -32,7 +74,7 @@ function onCaptured(uri, data) {
   const context = canvas.getContext("2d") //https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
 
   // get coordinates of crop (message inejcted content script)
-  document.getElementById("test").innerHTML = data.start[0]
+  // document.getElementById("test").innerHTML = data.start[0]
   console.log(data)
 
   let image = new Image()
@@ -52,7 +94,7 @@ function onCaptured(uri, data) {
     canvas.width = sWidth
     canvas.height = sHeight
 
-    console.log(startX, startY, endX, endY, sWidth, sHeight)
+    // console.log(startX, startY, endX, endY, sWidth, sHeight)
 
     context.drawImage(
       image,
@@ -65,6 +107,15 @@ function onCaptured(uri, data) {
       sWidth,
       sHeight
     )
+
+    let baseUrl = canvas.toDataURL("image/jpeg")
+// ----------------------------------------------------------
+    // store("screenshot", baseUrl)
+
+    // ;(async function () {
+    //   document.getElementById("hi").innerHTML = await load("screenshot")
+    // })()
+
     document.getElementById("hi").innerHTML = canvas.toDataURL("image/jpeg")
     document.getElementById("bye").innerHTML = data.height + " " + data.width
   }
@@ -75,21 +126,21 @@ function onError(error) {
   document.getElementById("hi").innerHTML = error
 }
 
-function getCoordinates() {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    mousePos = messageContentScript(tabs[0].id, "getCoordinates")
-  })
+function store(key, value) {
+  chrome.storage.session.set({ [key]: value })
 }
 
-function messageContentScript(tabID, message) {
-  console.log("Message sent to content script")
-  chrome.tabs.sendMessage(tabID, { message: message }, function (response) {
-    console.log("Recieved response")
-    // document.getElementById("test").innerHTML = response.msg.start[0]
-    console.log(response.msg.start, response.msg.end)
-
-    getScreen(response.msg)
-    messageSent = false
+async function load(key) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.session.get([key], function (response) {
+      console.log(response)
+      // document.getElementById("test").innerHTML = response[key]
+      if (response[key] != undefined) {
+        resolve(response[key])
+      } else {
+        reject()
+      }
+    })
   })
 }
 

@@ -17,7 +17,32 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 })
 
 function getCursor(sendResponse) {
-  document.body.classList.add("crosshair")
+  const windowWidth = window.innerWidth
+  const windowHeight = window.innerHeight
+
+  setInterval(() => {
+    console.log(windowWidth, windowHeight)
+  }, 1000)
+
+  const canvas = document.createElement("canvas")
+  const context = canvas.getContext("2d") // returns drawing context on canvas
+  context.canvas.width = windowWidth
+  context.canvas.height = windowHeight
+
+  canvas.classList.add("crosshair")
+
+  canvas.style.top = "0"
+  canvas.style.left = "0"
+  canvas.style.margin = "0"
+  canvas.style.border = "0"
+  canvas.style.padding = "0"
+  canvas.style.outline = "none"
+  canvas.style.position = "fixed"
+  canvas.style.zIndex = "2147483647"
+  // canvas.style.backgroundColor = "black"
+  // canvas.style.opacity = "0.1"
+
+  document.documentElement.appendChild(canvas)
 
   activated = false
   point1 = []
@@ -25,12 +50,43 @@ function getCursor(sendResponse) {
   mouseX = null
   mouseY = null
 
+  let startX
+  let startY
+
+  let prevStartX = 0
+  let prevStartY = 0
+
+  let prevWidth = 0
+  let prevHeight = 0
+
   const mouseMove = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+
     mouseX = event.clientX
     mouseY = event.clientY
+
+    let rectWidth = mouseX - startX
+    let rectHeight = mouseY - startY
+
+    if (activated) {
+      context.clearRect(0, 0, canvas.width, canvas.height)
+
+      context.fillStyle = "rgba(0, 0, 0, 0.15)"
+      context.fillRect(startX, startY, rectWidth, rectHeight)
+
+      prevStartX = startX
+      prevStartY = startY
+
+      prevWidth = rectWidth
+      prevHeight = rectHeight
+    }
   }
 
-  const mouseDown = () => {
+  const mouseDown = (event) => {
+    startX = event.clientX
+    startY = event.clientY
+
     if (!activated) {
       point1 = [mouseX, mouseY]
       activated = true
@@ -40,23 +96,42 @@ function getCursor(sendResponse) {
   const mouseUp = () => {
     if (activated) {
       point2 = [mouseX, mouseY]
-      document.body.classList.remove("crosshair")
 
       data = {
         start: point1,
         end: point2,
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: windowWidth,
+        height: windowHeight,
       }
 
-      sendResponse(data)
+      canvas.removeEventListener("mousemove", mouseMove)
+      canvas.removeEventListener("mousedown", mouseDown)
+      canvas.removeEventListener("mouseup", mouseUp)
 
-      document.removeEventListener("mousemove", mouseMove)
-      document.removeEventListener("mousedown", mouseDown)
-      document.removeEventListener("mouseup", mouseUp)
+      document.documentElement.removeChild(canvas)
+
+      console.log("sending message to background...")
+      // messageBackground("content script message amogus")
+
+      chrome.runtime.sendMessage({ data: "RAHHHHH" }, function (response) {
+        console.log("Recieved response: ")
+        console.log(response.message)
+      })
+
+      setTimeout(() => sendResponse(data), 10)
     }
   }
-  document.addEventListener("mousemove", mouseMove)
-  document.addEventListener("mousedown", mouseDown)
-  document.addEventListener("mouseup", mouseUp)
+
+  canvas.addEventListener("mousemove", mouseMove)
+  canvas.addEventListener("mousedown", mouseDown)
+  canvas.addEventListener("mouseup", mouseUp)
+}
+
+function messageBackground(message) {
+  console.log("Message sent to background")
+  chrome.runtime.sendMessage({ message: message }, function (response) {
+    console.log("Recieved response")
+
+    console.log(response.message)
+  })
 }
