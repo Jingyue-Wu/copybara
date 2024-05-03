@@ -1,22 +1,24 @@
 console.log("CONTENT SCRIPT INJECTED")
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  console.log("message recieved:")
-  console.log(request.message)
+let screenshotUri = null
 
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   cursorPos = null
 
-  if (request.message == "getCoordinates") {
-    getCursor((data) => {
-      sendResponse({ msg: data })
-      console.log("sent response back")
-    })
-  }
+  if (request.from == "popup" && request.message == "getCoordinates") {
+    console.log("message recieved:")
+    console.log(request.message)
 
-  return true
+    getCursor()
+  } else if (request.from == "popup") {
+    console.log("uri recieved:")
+    console.log(request.message)
+    screenshotUri = request.message
+  }
+  sendResponse({ message: "sent successfully to content script" })
 })
 
-function getCursor(sendResponse) {
+function getCursor() {
   const windowWidth = window.innerWidth
   const windowHeight = window.innerHeight
 
@@ -39,8 +41,6 @@ function getCursor(sendResponse) {
   canvas.style.outline = "none"
   canvas.style.position = "fixed"
   canvas.style.zIndex = "2147483647"
-  // canvas.style.backgroundColor = "black"
-  // canvas.style.opacity = "0.1"
 
   document.documentElement.appendChild(canvas)
 
@@ -52,12 +52,6 @@ function getCursor(sendResponse) {
 
   let startX
   let startY
-
-  let prevStartX = 0
-  let prevStartY = 0
-
-  let prevWidth = 0
-  let prevHeight = 0
 
   const mouseMove = (event) => {
     event.preventDefault()
@@ -74,12 +68,6 @@ function getCursor(sendResponse) {
 
       context.fillStyle = "rgba(0, 0, 0, 0.15)"
       context.fillRect(startX, startY, rectWidth, rectHeight)
-
-      prevStartX = startX
-      prevStartY = startY
-
-      prevWidth = rectWidth
-      prevHeight = rectHeight
     }
   }
 
@@ -111,14 +99,12 @@ function getCursor(sendResponse) {
       document.documentElement.removeChild(canvas)
 
       console.log("sending message to background...")
-      // messageBackground("content script message amogus")
 
-      chrome.runtime.sendMessage({ data: "RAHHHHH" }, function (response) {
-        console.log("Recieved response: ")
-        console.log(response.message)
-      })
+      // messageBackground(data)
 
-      setTimeout(() => sendResponse(data), 10)
+      // setTimeout(() => sendResponse(data), 10)
+
+      crop(screenshotUri, data)
     }
   }
 
@@ -128,10 +114,68 @@ function getCursor(sendResponse) {
 }
 
 function messageBackground(message) {
-  console.log("Message sent to background")
-  chrome.runtime.sendMessage({ message: message }, function (response) {
-    console.log("Recieved response")
+  // console.log("Message sent to background")
+  chrome.runtime.sendMessage(
+    { from: "content", data: message },
+    function (response) {
+      console.log(response.message)
+    }
+  )
+}
 
-    console.log(response.message)
-  })
+function crop(uri, data) {
+  const screenshotCanvas = document.createElement("canvas")
+  const context = screenshotCanvas.getContext("2d") //https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
+
+  // get coordinates of crop (message inejcted content script)
+  // document.getElementById("test").innerHTML = data.start[0]
+  console.log(data)
+
+  let image = new Image()
+  image.src = uri
+
+  image.onload = () => {
+    // crop
+    startX = Math.min(data.start[0], data.end[0])
+    startY = Math.min(data.start[1], data.end[1])
+
+    endX = Math.max(data.start[0], data.end[0])
+    endY = Math.max(data.start[1], data.end[1])
+
+    sWidth = endX - startX
+    sHeight = endY - startY
+
+    screenshotCanvas.width = sWidth
+    screenshotCanvas.height = sHeight
+
+    // console.log(startX, startY, endX, endY, sWidth, sHeight)
+
+    context.drawImage(
+      image,
+      startX,
+      startY,
+      sWidth,
+      sHeight,
+      0,
+      0,
+      sWidth,
+      sHeight
+    )
+
+    let baseUrl = screenshotCanvas.toDataURL("image/jpeg")
+    console.log("CROPPED SUCCESSFULLY: ")
+    console.log(baseUrl)
+
+    messageBackground(baseUrl)
+
+    // ----------------------------------------------------------
+    // store("screenshot", baseUrl)
+
+    // ;(async function () {
+    //   document.getElementById("hi").innerHTML = await load("screenshot")
+    // })()
+
+    // document.getElementById("hi").innerHTML = canvas.toDataURL("image/jpeg")
+    // document.getElementById("bye").innerHTML = data.height + " " + data.width
+  }
 }

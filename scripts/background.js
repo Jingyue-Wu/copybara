@@ -1,10 +1,19 @@
+let screenshotUri = null
+
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  console.log("message recieved:")
-  console.log(message.data)
+  if (message.from == "content") {
+    console.log("cropped uri recieved:")
+    console.log(message.data)
 
-  store("screenshot", message.data)
+    store("screenshot", message.data)
 
-  sendResponse({ message: "response from background" })
+    screenshotUri = message.data
+  }
+
+  sendResponse({
+    from: "background",
+    message: "sent successfully to background",
+  })
 })
 
 function store(key, value) {
@@ -15,7 +24,6 @@ async function load(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.session.get([key], function (response) {
       console.log(response)
-      // document.getElementById("test").innerHTML = response[key]
       if (response[key] != undefined) {
         resolve(response[key])
       } else {
@@ -23,4 +31,14 @@ async function load(key) {
       }
     })
   })
+}
+
+// ----------------------------------------------------
+
+async function writeToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch (error) {
+    console.log("Error writing to clipboard: " + error.message)
+  }
 }
