@@ -1,10 +1,25 @@
+let screenshotUri = null
+let result = null
+let currentCopiedText = null
+
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  console.log("message recieved:")
-  console.log(message.data)
+  if (message.from == "content") {
+    console.log("cropped uri recieved:")
+    console.log(message.data)
 
-  store("screenshot", message.data)
+    screenshotUri = message.data
+    ;(async function () {
+      currentCopiedText = await getText(screenshotUri)
+      console.log("text: ", currentCopiedText)
+      // writeToClipboard(currentCopiedText)
+      messageContentScript("text", currentCopiedText)
+    })()
+  }
 
-  sendResponse({ message: "response from background" })
+  sendResponse({
+    from: "background",
+    message: "sent successfully to background",
+  })
 })
 
 function store(key, value) {
@@ -15,12 +30,55 @@ async function load(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.session.get([key], function (response) {
       console.log(response)
-      // document.getElementById("test").innerHTML = response[key]
       if (response[key] != undefined) {
         resolve(response[key])
       } else {
         reject()
       }
     })
+  })
+}
+
+async function getText(imageBase64) {
+  const apiKey = "K83669950088957"
+  const url =
+    "https://api.ocr.space/parse/image?language=eng&OCREngine=2&isOverlayRequired=false&scale=true"
+
+  let myHeaders = new Headers()
+  myHeaders.append("apikey", apiKey)
+
+  let formdata = new FormData()
+  formdata.append("base64image", imageBase64)
+  formdata.append("scale", "true")
+
+  let requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: formdata,
+    redirect: "follow",
+  }
+
+  try {
+    const response = await fetch(url, requestOptions)
+    const result = await response.text()
+    const text = JSON.parse(result).ParsedResults[0].ParsedText
+    console.log(result)
+    return text
+  } catch (error) {
+    console.log("error", error)
+    return {}
+  }
+}
+
+function messageContentScript(key, message) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { from: "background", [key]: message },
+      function (response) {
+        console.log("sent message to content script", response)
+        messageSent = false
+      }
+    )
   })
 }
