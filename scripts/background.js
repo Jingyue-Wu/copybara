@@ -40,9 +40,9 @@ async function load(key) {
 }
 
 async function getText(imageBase64) {
-  const apiKey = ""
+  const apiKey = "K83669950088957"
   const url =
-    "https://api.ocr.space/parse/image?language=eng&isOverlayRequired=false"
+    "https://api.ocr.space/parse/image?language=eng&OCREngine=2&isOverlayRequired=false&scale=true"
 
   let myHeaders = new Headers()
   myHeaders.append("apikey", apiKey)
@@ -62,7 +62,7 @@ async function getText(imageBase64) {
     const response = await fetch(url, requestOptions)
     const result = await response.text()
     const text = JSON.parse(result).ParsedResults[0].ParsedText
-    console.log(text)
+    console.log(result)
     return text
   } catch (error) {
     console.log("error", error)

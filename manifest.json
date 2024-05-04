@@ -19,17 +19,11 @@
   ],
 
   "action": {
-    "default_popup": "index.html",
+    "default_popup": "popup.html",
     "default_icon": {}
   },
 
-  "permissions": [
-    "tabs",
-    "activeTab",
-    "clipboardRead",
-    "clipboardWrite",
-    "storage"
-  ],
+  "permissions": ["tabs", "activeTab", "storage"],
 
   "commands": {}
 }
