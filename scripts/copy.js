@@ -31,14 +31,3 @@ function getScreen() {
     messageSent = false
   })
 }
-
-// function messageBackground(message) {
-//   console.log("sending to background")
-//   chrome.runtime.sendMessage(
-//     { from: "popup", data: message },
-//     function (response) {
-//       console.log("sent message to background", response)
-//       messageSent = false
-//     }
-//   )
-// }

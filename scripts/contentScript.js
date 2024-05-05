@@ -31,22 +31,16 @@ function getCursor() {
   let windowWidth = window.innerWidth / window.devicePixelRatio
   let windowHeight = window.innerHeight / window.devicePixelRatio
 
-
-
   setInterval(() => {
     console.log(canvas.width, canvas.height, window.devicePixelRatio)
-    // console.log(windowWidth, windowHeight, window.devicePixelRatio)
-
   }, 1000)
 
   const canvas = document.createElement("canvas")
   const context = canvas.getContext("2d") // returns drawing context on canvas
 
-
   updateCanvasSize()
-
-  window.addEventListener("resize", updateCanvasSize);
-
+  window.addEventListener("resize", updateCanvasSize)
+  
   function updateCanvasSize() {
     windowWidth = window.innerWidth / window.devicePixelRatio
     windowHeight = window.innerHeight / window.devicePixelRatio
@@ -54,23 +48,7 @@ function getCursor() {
     canvas.height = window.innerHeight
   }
 
-  // context.canvas.width = window.innerWidth / window.devicePixelRatio
-  // context.canvas.height = window.innerHeight / window.devicePixelRatio
-
-
-
-  // window.addEventListener("resize", updateSize);
-  // function updateSize() {
-  //   // windowWidth = window.innerWidth / window.devicePixelRatio
-  //   // windowHeight = window.innerHeight / window.devicePixelRatio
-  //   context.canvas.width = window.innerWidth / window.devicePixelRatio
-  //   context.canvas.height = window.innerHeight / window.devicePixelRatio
-  // }
-
-
-
   canvas.classList.add("crosshair")
-
   canvas.style.top = "0"
   canvas.style.left = "0"
   canvas.style.margin = "0"
@@ -79,9 +57,6 @@ function getCursor() {
   canvas.style.outline = "none"
   canvas.style.position = "fixed"
   canvas.style.zIndex = "2147483647"
-  canvas.style.backgroundColor = "red"
-  canvas.style.opacity = "0.5"
-
   document.documentElement.appendChild(canvas)
 
   activated = false
@@ -89,6 +64,8 @@ function getCursor() {
   point2 = []
   mouseX = null
   mouseY = null
+  boxX = null
+  boxY = null
 
   var offsetX = canvas.offsetLeft
   var offsetY = canvas.offsetTop
@@ -96,39 +73,33 @@ function getCursor() {
   let startX
   let startY
 
+  let boxStartX
+  let boxStartY
+
   const mouseMove = (event) => {
     event.preventDefault()
     event.stopPropagation()
 
-    // mouseX = event.clientX
-    // mouseY = event.clientY
-
-    // mouseX = parseInt(event.clientX - offsetX)
-    // mouseY = parseInt(event.clientY - offsetY)
+    boxX = event.clientX
+    boxY = event.clientY
 
     mouseX = event.clientX * window.devicePixelRatio
     mouseY = event.clientY * window.devicePixelRatio
 
-
-
-    // setInterval(() => {
-    //   console.log(mouseX, mouseY, window.devicePixelRatio)
-    // }, 100)
-
-    let rectWidth = mouseX - startX
-    let rectHeight = mouseY - startY
+    let rectWidth = boxX - boxStartX
+    let rectHeight = boxY - boxStartY
 
     if (activated) {
       context.clearRect(0, 0, canvas.width, canvas.height)
 
       context.fillStyle = "rgba(0, 0, 0, 0.15)"
-      context.fillRect(startX, startY, rectWidth, rectHeight)
+      context.fillRect(boxStartX, boxStartY, rectWidth, rectHeight)
     }
   }
 
   const mouseDown = (event) => {
-    // startX = event.clientX
-    // startY = event.clientY
+    boxStartX = event.clientX
+    boxStartY = event.clientY
 
     // startX = parseInt(event.clientX - offsetX)
     // startY = parseInt(event.clientY - offsetY)
@@ -197,12 +168,6 @@ function crop(uri, data) {
 
     endX = Math.max(data.start[0], data.end[0])
     endY = Math.max(data.start[1], data.end[1])
-
-    // startX = Math.min(data.start[0], data.end[0]) * window.devicePixelRatio
-    // startY = Math.min(data.start[1], data.end[1]) * window.devicePixelRatio
-
-    // endX = Math.max(data.start[0], data.end[0]) * window.devicePixelRatio
-    // endY = Math.max(data.start[1], data.end[1]) * window.devicePixelRatio
 
     sWidth = endX - startX
     sHeight = endY - startY

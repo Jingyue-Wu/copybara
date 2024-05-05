@@ -40,7 +40,7 @@ async function load(key) {
 }
 
 async function getText(imageBase64) {
-  const apiKey = "K83669950088957"
+  const apiKey = ""
   const url =
     "https://api.ocr.space/parse/image?language=eng&OCREngine=2&isOverlayRequired=false&scale=true"
 
