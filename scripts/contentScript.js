@@ -40,7 +40,7 @@ function getCursor() {
 
   updateCanvasSize()
   window.addEventListener("resize", updateCanvasSize)
-  
+
   function updateCanvasSize() {
     windowWidth = window.innerWidth / window.devicePixelRatio
     windowHeight = window.innerHeight / window.devicePixelRatio
@@ -174,6 +174,10 @@ function crop(uri, data) {
 
     screenshotCanvas.width = sWidth
     screenshotCanvas.height = sHeight
+
+    // context.filter = "brightness(1.5) contrast(5)"
+    context.filter = "brightness(0.9) contrast(1.5)"
+
 
     // console.log(startX, startY, endX, endY, sWidth, sHeight)
 
