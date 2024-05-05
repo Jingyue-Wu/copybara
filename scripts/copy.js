@@ -16,7 +16,6 @@ function messageContentScript(key, message) {
       { from: "popup", [key]: message },
       function (response) {
         console.log("sent message to content script", response)
-        messageSent = false
       }
     )
   })
@@ -29,16 +28,17 @@ function getScreen() {
   capture.then((uri) => {
     console.log("URI:", uri)
     messageContentScript("message", uri)
+    messageSent = false
   })
 }
 
-function messageBackground(message) {
-  console.log("sending to background")
-  chrome.runtime.sendMessage(
-    { from: "popup", data: message },
-    function (response) {
-      console.log("sent message to background", response)
-      messageSent = false
-    }
-  )
-}
+// function messageBackground(message) {
+//   console.log("sending to background")
+//   chrome.runtime.sendMessage(
+//     { from: "popup", data: message },
+//     function (response) {
+//       console.log("sent message to background", response)
+//       messageSent = false
+//     }
+//   )
+// }
