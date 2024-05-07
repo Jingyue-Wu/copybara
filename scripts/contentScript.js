@@ -5,21 +5,21 @@ let screenshotUri = null
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   cursorPos = null
 
-  // Receive command to activate area selection with cursor from popup
+  // 2. Receive command to activate area selection with cursor from popup
   if (request.from == "popup" && request.message == "getCoordinates") {
     console.log("message recieved:")
     console.log(request.message)
     getCursor()
   }
 
-  // Receive full viewport screenshot from popup
+  // 1. Receive full viewport screenshot from popup
   else if (request.from == "popup") {
     console.log("uri recieved:")
     console.log(request.message)
     screenshotUri = request.message
   }
 
-  // Receive OCR text from background
+  // 3. Receive OCR text from background
   else if (request.from == "background") {
     writeToClipboard(request.text)
   }
@@ -28,20 +28,27 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 })
 
 function getCursor() {
-  const windowWidth = window.innerWidth
-  const windowHeight = window.innerHeight
+  let windowWidth = window.innerWidth / window.devicePixelRatio
+  let windowHeight = window.innerHeight / window.devicePixelRatio
 
   setInterval(() => {
-    console.log(windowWidth, windowHeight)
+    console.log(canvas.width, canvas.height, window.devicePixelRatio)
   }, 1000)
 
   const canvas = document.createElement("canvas")
   const context = canvas.getContext("2d") // returns drawing context on canvas
-  context.canvas.width = windowWidth
-  context.canvas.height = windowHeight
+
+  updateCanvasSize()
+  window.addEventListener("resize", updateCanvasSize)
+
+  function updateCanvasSize() {
+    windowWidth = window.innerWidth / window.devicePixelRatio
+    windowHeight = window.innerHeight / window.devicePixelRatio
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+  }
 
   canvas.classList.add("crosshair")
-
   canvas.style.top = "0"
   canvas.style.left = "0"
   canvas.style.margin = "0"
@@ -50,7 +57,6 @@ function getCursor() {
   canvas.style.outline = "none"
   canvas.style.position = "fixed"
   canvas.style.zIndex = "2147483647"
-
   document.documentElement.appendChild(canvas)
 
   activated = false
@@ -58,31 +64,48 @@ function getCursor() {
   point2 = []
   mouseX = null
   mouseY = null
+  boxX = null
+  boxY = null
+
+  var offsetX = canvas.offsetLeft
+  var offsetY = canvas.offsetTop
 
   let startX
   let startY
+
+  let boxStartX
+  let boxStartY
 
   const mouseMove = (event) => {
     event.preventDefault()
     event.stopPropagation()
 
-    mouseX = event.clientX
-    mouseY = event.clientY
+    boxX = event.clientX
+    boxY = event.clientY
 
-    let rectWidth = mouseX - startX
-    let rectHeight = mouseY - startY
+    mouseX = event.clientX * window.devicePixelRatio
+    mouseY = event.clientY * window.devicePixelRatio
+
+    let rectWidth = boxX - boxStartX
+    let rectHeight = boxY - boxStartY
 
     if (activated) {
       context.clearRect(0, 0, canvas.width, canvas.height)
 
       context.fillStyle = "rgba(0, 0, 0, 0.15)"
-      context.fillRect(startX, startY, rectWidth, rectHeight)
+      context.fillRect(boxStartX, boxStartY, rectWidth, rectHeight)
     }
   }
 
   const mouseDown = (event) => {
-    startX = event.clientX
-    startY = event.clientY
+    boxStartX = event.clientX
+    boxStartY = event.clientY
+
+    // startX = parseInt(event.clientX - offsetX)
+    // startY = parseInt(event.clientY - offsetY)
+
+    startX = event.clientX * window.devicePixelRatio
+    startY = event.clientY * window.devicePixelRatio
 
     if (!activated) {
       point1 = [mouseX, mouseY]
@@ -97,8 +120,8 @@ function getCursor() {
       data = {
         start: point1,
         end: point2,
-        width: windowWidth,
-        height: windowHeight,
+        width: canvas.width,
+        height: canvas.height,
       }
 
       canvas.removeEventListener("mousemove", mouseMove)
@@ -151,6 +174,10 @@ function crop(uri, data) {
 
     screenshotCanvas.width = sWidth
     screenshotCanvas.height = sHeight
+
+    // context.filter = "brightness(1.5) contrast(5)"
+    context.filter = "brightness(0.9) contrast(1.5)"
+
 
     // console.log(startX, startY, endX, endY, sWidth, sHeight)
 
