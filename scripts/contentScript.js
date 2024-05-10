@@ -141,7 +141,7 @@ function getCursor() {
   canvas.addEventListener("mouseup", mouseUp)
 }
 
-function messageBackground(message) {
+function messageOtherScript(message) {
   // console.log("Message sent to background")
   chrome.runtime.sendMessage(
     { from: "content", data: message },
@@ -178,7 +178,6 @@ function crop(uri, data) {
     // context.filter = "brightness(1.5) contrast(5)"
     context.filter = "brightness(0.9) contrast(1.5)"
 
-
     // console.log(startX, startY, endX, endY, sWidth, sHeight)
 
     context.drawImage(
@@ -197,11 +196,14 @@ function crop(uri, data) {
     console.log("CROPPED SUCCESSFULLY: ")
     console.log(baseUrl)
 
-    messageBackground(baseUrl)
+    messageOtherScript(baseUrl)
   }
 }
 
 async function writeToClipboard(text) {
+  // done
+  messageOtherScript("done")
+
   try {
     await navigator.clipboard.writeText(text)
     console.log("writing to clipboard", text)

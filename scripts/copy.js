@@ -1,13 +1,15 @@
-messageSent = false
+activated = false
 
 const button = document.getElementById("button")
-button.addEventListener("click", () => {
-  if (!messageSent) {
+button.addEventListener("click", activateExtension)
+
+function activateExtension() {
+  if (!activated) {
     getScreen()
     messageContentScript("message", "getCoordinates")
-    messageSent = true
+    activated = true
   }
-})
+}
 
 function messageContentScript(key, message) {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -28,6 +30,16 @@ function getScreen() {
   capture.then((uri) => {
     console.log("URI:", uri)
     messageContentScript("message", uri)
-    messageSent = false
   })
 }
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.from == "content" && request.data == "done") {
+    console.log("message recieved: done")
+    activated = false
+  } else if (request.from == "background" && request.data == "shortcut") {
+    activateExtension()
+  }
+
+  sendResponse({ message: "sent successfully to popup" })
+})

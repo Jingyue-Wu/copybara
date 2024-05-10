@@ -2,8 +2,26 @@ let screenshotUri = null
 let result = null
 let currentCopiedText = null
 
+chrome.commands.onCommand.addListener((command) => {
+  if (command == "activate-copy") {
+    messageOtherScript("shortcut")
+    console.log("amogus")
+  }
+})
+
+// chrome.commands.onCommand.addListener(function (command) {
+//   switch (command) {
+//     case "activate-copy":
+//       messageOtherScript("shortcut")
+//       console.log("amogus")
+//       break
+//     default:
+//       console.log(`Command ${command} not found`)
+//   }
+// })
+
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.from == "content") {
+  if (message.from == "content" && message.data != "done") {
     console.log("cropped uri recieved:")
     console.log(message.data)
 
@@ -11,7 +29,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     ;(async function () {
       currentCopiedText = await getText(screenshotUri)
       console.log("text: ", currentCopiedText)
-      // writeToClipboard(currentCopiedText)
       messageContentScript("text", currentCopiedText)
     })()
   }
@@ -40,7 +57,7 @@ async function load(key) {
 }
 
 async function getText(imageBase64) {
-  const apiKey = ""
+  const apiKey = "K83669950088957"
   const url =
     "https://api.ocr.space/parse/image?language=eng&OCREngine=2&isOverlayRequired=false&scale=true"
 
@@ -81,4 +98,9 @@ function messageContentScript(key, message) {
       }
     )
   })
+}
+
+function messageOtherScript(message) {
+  // console.log("Message sent to background")
+  chrome.runtime.sendMessage({ from: "background", data: message })
 }

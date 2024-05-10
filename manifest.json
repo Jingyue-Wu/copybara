@@ -25,5 +25,12 @@
 
   "permissions": ["tabs", "activeTab", "storage"],
 
-  "commands": {}
+  "commands": {
+    "activate-copy": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S"
+      },
+      "description": "Activate extension"
+    }
+  }
 }
