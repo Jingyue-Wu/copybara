@@ -1,14 +1,24 @@
 let screenshotUri = null
 let result = null
 let currentCopiedText = null
+activated = false
 
 chrome.commands.onCommand.addListener((command) => {
-  if (command == "activate-copy") {
+  if (command == "activate-copy" && activated == false) {
     messageContentScript("message", "shortcutGetCoordinates")
-    console.log("amogus")
+    activated = true
   }
 })
 
+// Initialize clipboard
+// store("cb", { data: [] })
+
+load("cb").then(function () {
+  if (currentCb == undefined) {
+    store("cb", currentCb)
+    console.log("new client")
+  }
+})
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (
@@ -24,52 +34,25 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       currentCopiedText = await getText(screenshotUri)
       console.log("text: ", currentCopiedText)
       messageContentScript("text", currentCopiedText)
-    })()
 
+      if (currentCopiedText != "") {
+        updateStorage(currentCopiedText)
+      }
+    })()
   } else if (message.from == "content" && message.data == "getScreen") {
     let capture = chrome.tabs.captureVisibleTab({ format: "png" })
     capture.then((uri) => {
       console.log("URI:", uri)
 
       messageContentScript("uri", uri)
-
-
-
-
-
     })
-
-    // chrome.tabs.captureVisibleTab(null, {}, function (dataUrl) {
-    //   sendResponse({ uri: dataUrl })
-    // })
-    // return true
   }
-
 
   sendResponse({
     from: "background",
     message: "sent successfully to background",
   })
 })
-
-
-function store(key, value) {
-  chrome.storage.session.set({ [key]: value })
-}
-
-async function load(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.session.get([key], function (response) {
-      console.log(response)
-      if (response[key] != undefined) {
-        resolve(response[key])
-      } else {
-        reject()
-      }
-    })
-  })
-}
-
 
 async function getText(imageBase64) {
   const apiKey = "K83669950088957"
@@ -89,6 +72,8 @@ async function getText(imageBase64) {
     body: formdata,
     redirect: "follow",
   }
+
+  activated = false
 
   try {
     const response = await fetch(url, requestOptions)
@@ -116,14 +101,39 @@ function messageContentScript(key, message) {
 }
 
 function messageOtherScript(message) {
-  // console.log("Message sent to background")
   chrome.runtime.sendMessage({ from: "background", data: message })
 }
 
-// function activateExtension() {
-//   if (!activated) {
-//     getScreen()
-//     messageContentScript("message", "getCoordinates")
-//     activated = true
-//   }
-// }
+// browser storage
+
+let currentCb = null
+
+function store(key, value) {
+  chrome.storage.sync.set({ [key]: value })
+}
+
+async function load(key) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get([key], function (response) {
+      console.log(response)
+      if (response[key] != undefined) {
+        currentCb = response[key]
+        resolve(response[key])
+      } else {
+        reject()
+      }
+    })
+  })
+}
+
+function updateStorage(newValue) {
+  load("cb").then(function () {
+    currentCb.data.push(newValue)
+    store("cb", currentCb)
+  })
+}
+
+// setInterval(() => {
+//   console.log(currentCb)
+//   load("cb")
+// }, 500)

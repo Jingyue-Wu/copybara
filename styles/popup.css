@@ -3,9 +3,25 @@ body {
   background-color: white !important;
   user-select: none;
   width: 300px;
-  height: 450px;
+  height: 550px;
   display: flex;
   flex-direction: column;
+}
+
+#scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background-color: transparent;
+  overflow-x: hidden;
+}
+
+#scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 1em;
+  background-color: #d3d3d3;
+}
+
+#scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #868686;
 }
 
 a {
@@ -34,7 +50,7 @@ h3 {
 
 hr {
   display: block;
-  height: 1px;
+  height: 0;
   border: 0;
   border-top: 1px solid #d4d4d4;
   margin: 0 5px;
@@ -70,8 +86,16 @@ p {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
-  margin: 4px 4px 4px 8px;
+  margin: 0px 4px 4px 8px;
+}
 
+.scrollSection {
+  overflow-y: scroll;
+  height: 460px;
+}
+
+.scrollSectionHr {
+  margin-bottom: 50px;
 }
 
 .logo {
@@ -110,7 +134,7 @@ button {
   padding: 2px 24px;
 }
 
-.coloredButton:hover{
+.coloredButton:hover {
   background-color: #a562fc;
 }
 
@@ -123,9 +147,42 @@ button {
   color: #8f55d9;
 }
 
+.footer {
+  padding: 4px;
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 12px 12px 12px;
+}
+
+#clearButton {
+  background-color: #8f55d9;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 24px;
+}
+
+#clearButton:hover {
+  background-color: #a562fc;
+}
+
+.buttonText {
+  color: white;
+  font-size: medium;
+}
+
 #clipboard {
   margin-left: 16px;
   margin-right: 16px;
+  display: flex;
+  flex-direction: column-reverse;
+  margin-bottom: 16px;
 }
 
 .listItem {
@@ -133,5 +190,38 @@ button {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  gap: 16px;
+}
+
+.saveText {
+  margin: 24px 16px 8px 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+#saveButton {
+  background-color: #8f55d9;
+  border: none;
+  border-width: 2px;
+  border-radius: 8px;
+  padding: 2px 16px;
+  color: white;
+  cursor: pointer;
+}
+
+#saveButton:hover {
+  background-color: #a562fc;
+}
+
+input {
+  background-color: white;
+  border: 2px solid #8f55d9;
+  border-width: 2px;
+  border-radius: 8px;
+  padding: 2px 16px;
+  color: black;
+  width: 150px;
+  margin: 8px 0 16px 0;
 }

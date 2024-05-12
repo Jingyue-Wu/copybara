@@ -139,7 +139,7 @@ function getCursor() {
 
       crop(screenshotUri, data)
 
-      document.body.style.cursor = 'wait';
+      document.body.style.cursor = "wait"
     }
   }
 
@@ -162,7 +162,7 @@ function crop(uri, data) {
   const context = screenshotCanvas.getContext("2d")
 
   // get coordinates of crop
-  
+
   console.log(data)
 
   let image = new Image()
@@ -210,11 +210,16 @@ function getScreen() {
 async function writeToClipboard(text) {
   messageOtherScript("done")
 
-  try {
-    await navigator.clipboard.writeText(text)
-    console.log("writing to clipboard", text)
-    document.body.style.cursor = 'default';
-  } catch (error) {
-    console.log("Error writing to clipboard: " + error.message)
+  if (text != "") {
+    try {
+      await navigator.clipboard.writeText(text)
+      console.log("writing to clipboard", text)
+    } catch (error) {
+      console.log("Error writing to clipboard: " + error.message)
+    }
+  } else {
+    console.log("No text detected")
   }
+
+  document.body.style.cursor = "default"
 }

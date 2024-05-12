@@ -21,45 +21,44 @@
       </button>
     </div>
 
-    <div>
-      <hr />
-      <h2>Copy</h2>
-      <hr />
+    <hr />
 
-      <div class="copy">
-        <button id="copyButton" class="coloredButton">
-          <h1 class="copyText">Select from webpage</h1>
-        </button>
-        <p><span class="bold">Shortcut:</span> Ctrl + Shift + S</p>
+    <div id="scrollbar" class="scrollSection">
+      <div>
+        <h2>Copy</h2>
+        <hr />
+
+        <div class="copy">
+          <button id="copyButton" class="coloredButton">
+            <h1 class="copyText">Select from webpage</h1>
+          </button>
+          <p><span class="bold">Shortcut:</span> Ctrl + Shift + S</p>
+        </div>
+      </div>
+
+      <div>
+        <hr />
+        <h2>Clipboard</h2>
+        <hr />
+      </div>
+
+      <form type="text" class="saveText" action="" id="saveForm">
+        <input type="text" id="saveInput" maxlength="1000" placeholder="Save to clipboard" />
+        <input id="saveButton" type="submit" value="Save" />
+      </form>
+
+      <div id="clipboard">
+        <!-- <div class="listItem">
+          <h3>text test</h3>
+          <button class="whiteButton">Copy</button>
+        </div> -->
       </div>
     </div>
 
-    <div>
-      <hr />
-      <h2>Clipboard</h2>
-      <hr />
-    </div>
+    <hr class="scrollSectionHr" />
 
-    <div id="clipboard">
-      <div class="listItem">
-        <h3>text test asdfext test asdfaslkjdf sasdfext test asdfaslkjdf sasdfaslkjdf sasdf</h3>
-        <button class="whiteButton">Copy</button>
-      </div>
-
-      <!-- <div class="listItem">
-        <h3>text test asdfext test asdfaslkjdf sasdfext test asdfaslkjdf sasdfaslkjdf sasdf</h3>
-        <button class="whiteButton">Copy</button>
-      </div>
-
-      <div class="listItem">
-        <h3>text test asdfext test asdfaslkjdf sasdfext test asdfaslkjdf sasdfaslkjdf sasdf</h3>
-        <button class="whiteButton">Copy</button>
-      </div>
-
-      <div class="listItem">
-        <h3>text test asdfext test asdfaslkjdf sasdfext test asdfaslkjdf sasdfaslkjdf sasdf</h3>
-        <button class="whiteButton">Copy</button>
-      </div> -->
+    <div class="footer">
+      <button id="clearButton"><span class="buttonText">Clear</span></button>
     </div>
 
     <script src="./scripts/copy.js"></script>
