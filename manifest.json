@@ -23,7 +23,9 @@
     "default_icon": {}
   },
 
-  "permissions": ["tabs", "activeTab", "storage"],
+  "permissions": ["tabs", "activeTab", "storage", "<all_urls>"],
+
+  "host_permissions": ["<all_urls>"],
 
   "commands": {
     "activate-copy": {

@@ -8,20 +8,59 @@
   </head>
 
   <body>
-    <h1 class="">Copybara</h1>
+    <div class="nav">
+      <a target="_blank" href="https://github.com/Jingyue-Wu/copybara">
+        <div class="logo">
+          <img class="icon" src="/icons/capyblapy.svg" alt="logo" />
+          <h1 class="">Copybara</h1>
+        </div>
+      </a>
 
-    <button id="button">Copy</button>
+      <button class="navicon">
+        <img class="naviconimg" src="/icons/menu.svg" alt="info" />
+      </button>
+    </div>
 
-    <!-- <canvas id="can"></canvas> -->
+    <div>
+      <hr />
+      <h2>Copy</h2>
+      <hr />
 
-    <h1 id="hi">Clipboard</h1>
-    <br>
-    <h1 id="bye">asdfasdf</h1>
-    <ul>
-      <li>
-        <h2>previous copied items</h2>
-      </li>
-    </ul>
+      <div class="copy">
+        <button id="copyButton" class="coloredButton">
+          <h1 class="copyText">Select from webpage</h1>
+        </button>
+        <p><span class="bold">Shortcut:</span> Ctrl + Shift + S</p>
+      </div>
+    </div>
+
+    <div>
+      <hr />
+      <h2>Clipboard</h2>
+      <hr />
+    </div>
+
+    <div id="clipboard">
+      <div class="listItem">
+        <h3>text test asdfext test asdfaslkjdf sasdfext test asdfaslkjdf sasdfaslkjdf sasdf</h3>
+        <button class="whiteButton">Copy</button>
+      </div>
+
+      <!-- <div class="listItem">
+        <h3>text test asdfext test asdfaslkjdf sasdfext test asdfaslkjdf sasdfaslkjdf sasdf</h3>
+        <button class="whiteButton">Copy</button>
+      </div>
+
+      <div class="listItem">
+        <h3>text test asdfext test asdfaslkjdf sasdfext test asdfaslkjdf sasdfaslkjdf sasdf</h3>
+        <button class="whiteButton">Copy</button>
+      </div>
+
+      <div class="listItem">
+        <h3>text test asdfext test asdfaslkjdf sasdfext test asdfaslkjdf sasdfaslkjdf sasdf</h3>
+        <button class="whiteButton">Copy</button>
+      </div> -->
+    </div>
 
     <script src="./scripts/copy.js"></script>
   </body>

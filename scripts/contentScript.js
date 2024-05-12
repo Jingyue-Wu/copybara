@@ -5,22 +5,31 @@ let screenshotUri = null
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   cursorPos = null
 
-  // 2. Receive command to activate area selection with cursor from popup
+  // Receive command to activate area selection with cursor from popup
   if (request.from == "popup" && request.message == "getCoordinates") {
     console.log("message recieved:")
     console.log(request.message)
     getCursor()
   }
 
-  // 1. Receive full viewport screenshot from popup
-  else if (request.from == "popup") {
-    console.log("uri recieved:")
-    console.log(request.message)
-    screenshotUri = request.message
+  // Receive activate comand via shortcut
+  else if (
+    request.from == "background" &&
+    request.message == "shortcutGetCoordinates"
+  ) {
+    console.log("test")
+    getCursor()
   }
 
-  // 3. Receive OCR text from background
+  // Receive uri from background
+  else if (request.from == "background" && request.uri != undefined) {
+    console.log(request.uri)
+    screenshotUri = request.uri
+  }
+
+  // Receive OCR text from background
   else if (request.from == "background") {
+    console.log("RECIEVED OCR TEXT")
     writeToClipboard(request.text)
   }
 
@@ -36,7 +45,7 @@ function getCursor() {
   }, 1000)
 
   const canvas = document.createElement("canvas")
-  const context = canvas.getContext("2d") // returns drawing context on canvas
+  const context = canvas.getContext("2d")
 
   updateCanvasSize()
   window.addEventListener("resize", updateCanvasSize)
@@ -67,9 +76,6 @@ function getCursor() {
   boxX = null
   boxY = null
 
-  var offsetX = canvas.offsetLeft
-  var offsetY = canvas.offsetTop
-
   let startX
   let startY
 
@@ -98,11 +104,10 @@ function getCursor() {
   }
 
   const mouseDown = (event) => {
+    getScreen()
+
     boxStartX = event.clientX
     boxStartY = event.clientY
-
-    // startX = parseInt(event.clientX - offsetX)
-    // startY = parseInt(event.clientY - offsetY)
 
     startX = event.clientX * window.devicePixelRatio
     startY = event.clientY * window.devicePixelRatio
@@ -133,6 +138,8 @@ function getCursor() {
       console.log("sending message to background...")
 
       crop(screenshotUri, data)
+
+      document.body.style.cursor = 'wait';
     }
   }
 
@@ -142,7 +149,6 @@ function getCursor() {
 }
 
 function messageOtherScript(message) {
-  // console.log("Message sent to background")
   chrome.runtime.sendMessage(
     { from: "content", data: message },
     function (response) {
@@ -156,7 +162,7 @@ function crop(uri, data) {
   const context = screenshotCanvas.getContext("2d")
 
   // get coordinates of crop
-
+  
   console.log(data)
 
   let image = new Image()
@@ -175,10 +181,7 @@ function crop(uri, data) {
     screenshotCanvas.width = sWidth
     screenshotCanvas.height = sHeight
 
-    // context.filter = "brightness(1.5) contrast(5)"
     context.filter = "brightness(0.9) contrast(1.5)"
-
-    // console.log(startX, startY, endX, endY, sWidth, sHeight)
 
     context.drawImage(
       image,
@@ -200,13 +203,17 @@ function crop(uri, data) {
   }
 }
 
+function getScreen() {
+  chrome.runtime.sendMessage({ from: "content", data: "getScreen" })
+}
+
 async function writeToClipboard(text) {
-  // done
   messageOtherScript("done")
 
   try {
     await navigator.clipboard.writeText(text)
     console.log("writing to clipboard", text)
+    document.body.style.cursor = 'default';
   } catch (error) {
     console.log("Error writing to clipboard: " + error.message)
   }

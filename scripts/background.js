@@ -4,24 +4,18 @@ let currentCopiedText = null
 
 chrome.commands.onCommand.addListener((command) => {
   if (command == "activate-copy") {
-    messageOtherScript("shortcut")
+    messageContentScript("message", "shortcutGetCoordinates")
     console.log("amogus")
   }
 })
 
-// chrome.commands.onCommand.addListener(function (command) {
-//   switch (command) {
-//     case "activate-copy":
-//       messageOtherScript("shortcut")
-//       console.log("amogus")
-//       break
-//     default:
-//       console.log(`Command ${command} not found`)
-//   }
-// })
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.from == "content" && message.data != "done") {
+  if (
+    message.from == "content" &&
+    message.data != "done" &&
+    message.data != "getScreen"
+  ) {
     console.log("cropped uri recieved:")
     console.log(message.data)
 
@@ -31,13 +25,33 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       console.log("text: ", currentCopiedText)
       messageContentScript("text", currentCopiedText)
     })()
+
+  } else if (message.from == "content" && message.data == "getScreen") {
+    let capture = chrome.tabs.captureVisibleTab({ format: "png" })
+    capture.then((uri) => {
+      console.log("URI:", uri)
+
+      messageContentScript("uri", uri)
+
+
+
+
+
+    })
+
+    // chrome.tabs.captureVisibleTab(null, {}, function (dataUrl) {
+    //   sendResponse({ uri: dataUrl })
+    // })
+    // return true
   }
+
 
   sendResponse({
     from: "background",
     message: "sent successfully to background",
   })
 })
+
 
 function store(key, value) {
   chrome.storage.session.set({ [key]: value })
@@ -55,6 +69,7 @@ async function load(key) {
     })
   })
 }
+
 
 async function getText(imageBase64) {
   const apiKey = "K83669950088957"
@@ -104,3 +119,11 @@ function messageOtherScript(message) {
   // console.log("Message sent to background")
   chrome.runtime.sendMessage({ from: "background", data: message })
 }
+
+// function activateExtension() {
+//   if (!activated) {
+//     getScreen()
+//     messageContentScript("message", "getCoordinates")
+//     activated = true
+//   }
+// }
