@@ -56,6 +56,7 @@ function updateListItems(content) {
 
     const button = document.createElement("button")
     button.classList.add("whiteButton")
+    button.classList.add("saveToClipboard")
     button.innerText = "Copy"
     listItem.appendChild(button)
 
@@ -109,8 +110,25 @@ function clearList() {
 let saveForm = document.getElementById("saveForm")
 
 saveForm.addEventListener("submit", (e) => {
-  e.preventDefault()
-
+  // e.preventDefault()
   const input = document.getElementById("saveInput").value
-  updateStorage(input)
+
+  if (input != "") {
+    updateStorage(input)
+  }
+})
+
+document.addEventListener("DOMContentLoaded", function () {
+  while (true) {
+    let copyButtons = document.getElementsByClassName("saveToClipboard")
+    for (let i = 0; i < copyButtons.length; i++) {
+      console.log(copyButtons[i])
+      copyButtons[i].addEventListener("click", () => {
+        let value = copyButtons[i].parentElement.querySelector("h3").textContent
+        console.log("Value:", value)
+
+        messageContentScript("message", value)
+      })
+    }
+  }
 })

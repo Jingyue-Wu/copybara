@@ -2,3 +2,7 @@
   cursor: crosshair !important;
   user-select: none !important;
 }
+
+.loadingCursor {
+  cursor: wait;
+}

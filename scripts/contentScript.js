@@ -12,6 +12,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     getCursor()
   }
 
+  // Recieve command to manually write to clipboard
+  else if (request.from == "popup") {
+    console.log("im gonna put into clipboard now: " + request.message)
+    writeToClipboard(request.message)
+  }
+
   // Receive activate comand via shortcut
   else if (
     request.from == "background" &&
@@ -139,7 +145,8 @@ function getCursor() {
 
       crop(screenshotUri, data)
 
-      document.body.style.cursor = "wait"
+      // document.body.style.cursor = "wait"
+      document.body.classList.add("loadingCursor")
     }
   }
 
@@ -221,5 +228,6 @@ async function writeToClipboard(text) {
     console.log("No text detected")
   }
 
-  document.body.style.cursor = "default"
+  // document.body.style.cursor = "default"
+  document.body.classList.remove("loadingCursor")
 }
