@@ -1,19 +1,41 @@
 let screenshotUri = null
 let result = null
 let currentCopiedText = null
+activated = false
+
+chrome.commands.onCommand.addListener((command) => {
+  if (command == "activate-copy" && activated == false) {
+    messageContentScript("message", "shortcutGetCoordinates")
+    activated = true
+  }
+})
+
+load("cb").then(function () {
+  if (currentCb == undefined) {
+    store("cb", currentCb)
+  }
+})
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.from == "content") {
-    console.log("cropped uri recieved:")
-    console.log(message.data)
-
+  if (
+    message.from == "content" &&
+    message.data != "done" &&
+    message.data != "getScreen"
+  ) {
     screenshotUri = message.data
     ;(async function () {
       currentCopiedText = await getText(screenshotUri)
-      console.log("text: ", currentCopiedText)
-      // writeToClipboard(currentCopiedText)
       messageContentScript("text", currentCopiedText)
+
+      if (currentCopiedText != "") {
+        updateStorage(currentCopiedText)
+      }
     })()
+  } else if (message.from == "content" && message.data == "getScreen") {
+    let capture = chrome.tabs.captureVisibleTab({ format: "png" })
+    capture.then((uri) => {
+      messageContentScript("uri", uri)
+    })
   }
 
   sendResponse({
@@ -22,25 +44,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   })
 })
 
-function store(key, value) {
-  chrome.storage.session.set({ [key]: value })
-}
-
-async function load(key) {
-  return new Promise((resolve, reject) => {
-    chrome.storage.session.get([key], function (response) {
-      console.log(response)
-      if (response[key] != undefined) {
-        resolve(response[key])
-      } else {
-        reject()
-      }
-    })
-  })
-}
-
 async function getText(imageBase64) {
-  const apiKey = ""
+  const apiKey = "K83669950088957"
   const url =
     "https://api.ocr.space/parse/image?language=eng&OCREngine=2&isOverlayRequired=false&scale=true"
 
@@ -58,11 +63,12 @@ async function getText(imageBase64) {
     redirect: "follow",
   }
 
+  activated = false
+
   try {
     const response = await fetch(url, requestOptions)
     const result = await response.text()
     const text = JSON.parse(result).ParsedResults[0].ParsedText
-    console.log(result)
     return text
   } catch (error) {
     console.log("error", error)
@@ -76,9 +82,40 @@ function messageContentScript(key, message) {
       tabs[0].id,
       { from: "background", [key]: message },
       function (response) {
-        console.log("sent message to content script", response)
         messageSent = false
       }
     )
+  })
+}
+
+function messageOtherScript(message) {
+  chrome.runtime.sendMessage({ from: "background", data: message })
+}
+
+// browser storage
+
+let currentCb = null
+
+function store(key, value) {
+  chrome.storage.sync.set({ [key]: value })
+}
+
+async function load(key) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get([key], function (response) {
+      if (response[key] != undefined) {
+        currentCb = response[key]
+        resolve(response[key])
+      } else {
+        reject()
+      }
+    })
+  })
+}
+
+function updateStorage(newValue) {
+  load("cb").then(function () {
+    currentCb.data.push(newValue)
+    store("cb", currentCb)
   })
 }

@@ -8,20 +8,114 @@
   </head>
 
   <body>
-    <h1 class="">Copybara</h1>
+    <div class="nav">
+      <a target="_blank" href="https://github.com/Jingyue-Wu/copybara">
+        <div class="logo">
+          <img class="icon" src="/icons/capyblapy.svg" alt="logo" />
+          <h1 class="">Copybara</h1>
+        </div>
+      </a>
 
-    <button id="button">Copy</button>
+      <button id="aboutButton" class="navicon" alt="info">
+        <img class="naviconimg" src="/icons/menu.svg" alt="info" />
+      </button>
+    </div>
+    <hr />
 
-    <!-- <canvas id="can"></canvas> -->
+    <div class="scrollSection scrollbar">
+      <div>
+        <h2>Copy</h2>
+        <hr />
+        <div class="copy">
+          <button
+            id="copyButton"
+            class="btn btn-moving-gradient btn-moving-gradient--blue"
+          >
+            Select from webpage
+          </button>
 
-    <h1 id="hi">Clipboard</h1>
-    <br>
-    <h1 id="bye">asdfasdf</h1>
-    <ul>
-      <li>
-        <h2>previous copied items</h2>
-      </li>
-    </ul>
+          <p><span class="bold">Shortcut:</span> Ctrl + Shift + S</p>
+        </div>
+      </div>
+
+      <div>
+        <hr />
+        <h2>Clipboard</h2>
+        <hr />
+      </div>
+
+      <form type="text" class="saveText" action="" id="saveForm">
+        <input
+          type="text"
+          id="saveInput"
+          maxlength="1000"
+          placeholder="Save to clipboard"
+        />
+        <input id="saveButton" type="submit" value="Save" />
+      </form>
+
+      <div id="clipboard">
+        <div class="listItem">
+          <h3>Initalize content</h3>
+          <button class="whiteButton">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal" class="infoPage invisible scrollbar">
+      <div>
+        <h2>About</h2>
+        <hr />
+
+        <p class="text">
+          Enables you to copy text to clipboard from anything. This includes
+          images, videos, and copy-blocked pages and documents.
+        </p>
+        <p class="text">
+          Also allows you to acess past copy history and manually save text to a
+          virtual clipboard.
+        </p>
+        <p class="text">
+          Data is synchronized across all browsers that you are logged in to,
+          letting you quickly save/transfer links, bookmarks and other info
+          across devices.
+        </p>
+      </div>
+
+      <div>
+        <hr />
+        <h2>Instructions</h2>
+        <hr />
+
+        <p class="text bold">Copying</p>
+
+        <p class="text">
+          Click the "Select from webpage" button or use Ctrl + Shift + S to
+          activate the scanner. Drag your cursor over the area you want to copy.
+          The text will automatically be copied.
+        </p>
+
+        <p class="text">If the result has errors, zoom in and try again.</p>
+
+        <br />
+        <p class="text bold">Virtual Clipboard</p>
+
+        <p class="text">
+          Use the "Save to clipboard" field to manually save text.
+        </p>
+
+        <p class="text">
+          Use the "Clear" button to delete your saved data from all browser
+          instances.
+        </p>
+      </div>
+    </div>
+
+    <hr class="scrollSectionHr" />
+
+    <div class="footer">
+      <button id="clearButton"><span class="buttonText">Clear</span></button>
+    </div>
 
     <script src="./scripts/copy.js"></script>
   </body>

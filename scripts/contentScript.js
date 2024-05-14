@@ -1,25 +1,27 @@
-console.log("CONTENT SCRIPT INJECTED")
-
 let screenshotUri = null
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   cursorPos = null
 
-  // 2. Receive command to activate area selection with cursor from popup
+  // Receive command to activate area selection with cursor from popup
   if (request.from == "popup" && request.message == "getCoordinates") {
-    console.log("message recieved:")
-    console.log(request.message)
     getCursor()
   }
 
-  // 1. Receive full viewport screenshot from popup
-  else if (request.from == "popup") {
-    console.log("uri recieved:")
-    console.log(request.message)
-    screenshotUri = request.message
+  // Receive activate comand via shortcut
+  else if (
+    request.from == "background" &&
+    request.message == "shortcutGetCoordinates"
+  ) {
+    getCursor()
   }
 
-  // 3. Receive OCR text from background
+  // Receive uri from background
+  else if (request.from == "background" && request.uri != undefined) {
+    screenshotUri = request.uri
+  }
+
+  // Receive OCR text from background
   else if (request.from == "background") {
     writeToClipboard(request.text)
   }
@@ -31,12 +33,8 @@ function getCursor() {
   let windowWidth = window.innerWidth / window.devicePixelRatio
   let windowHeight = window.innerHeight / window.devicePixelRatio
 
-  setInterval(() => {
-    console.log(canvas.width, canvas.height, window.devicePixelRatio)
-  }, 1000)
-
   const canvas = document.createElement("canvas")
-  const context = canvas.getContext("2d") // returns drawing context on canvas
+  const context = canvas.getContext("2d")
 
   updateCanvasSize()
   window.addEventListener("resize", updateCanvasSize)
@@ -67,9 +65,6 @@ function getCursor() {
   boxX = null
   boxY = null
 
-  var offsetX = canvas.offsetLeft
-  var offsetY = canvas.offsetTop
-
   let startX
   let startY
 
@@ -98,11 +93,10 @@ function getCursor() {
   }
 
   const mouseDown = (event) => {
+    getScreen()
+
     boxStartX = event.clientX
     boxStartY = event.clientY
-
-    // startX = parseInt(event.clientX - offsetX)
-    // startY = parseInt(event.clientY - offsetY)
 
     startX = event.clientX * window.devicePixelRatio
     startY = event.clientY * window.devicePixelRatio
@@ -130,9 +124,9 @@ function getCursor() {
 
       document.documentElement.removeChild(canvas)
 
-      console.log("sending message to background...")
-
       crop(screenshotUri, data)
+
+      document.body.classList.add("loadingCursor")
     }
   }
 
@@ -141,23 +135,13 @@ function getCursor() {
   canvas.addEventListener("mouseup", mouseUp)
 }
 
-function messageBackground(message) {
-  // console.log("Message sent to background")
-  chrome.runtime.sendMessage(
-    { from: "content", data: message },
-    function (response) {
-      console.log(response.message)
-    }
-  )
+function messageOtherScript(message) {
+  chrome.runtime.sendMessage({ from: "content", data: message })
 }
 
 function crop(uri, data) {
   const screenshotCanvas = document.createElement("canvas")
   const context = screenshotCanvas.getContext("2d")
-
-  // get coordinates of crop
-
-  console.log(data)
 
   let image = new Image()
   image.src = uri
@@ -175,11 +159,7 @@ function crop(uri, data) {
     screenshotCanvas.width = sWidth
     screenshotCanvas.height = sHeight
 
-    // context.filter = "brightness(1.5) contrast(5)"
     context.filter = "brightness(0.9) contrast(1.5)"
-
-
-    // console.log(startX, startY, endX, endY, sWidth, sHeight)
 
     context.drawImage(
       image,
@@ -194,18 +174,27 @@ function crop(uri, data) {
     )
 
     let baseUrl = screenshotCanvas.toDataURL("image/jpeg")
-    console.log("CROPPED SUCCESSFULLY: ")
-    console.log(baseUrl)
 
-    messageBackground(baseUrl)
+    messageOtherScript(baseUrl)
   }
 }
 
+function getScreen() {
+  chrome.runtime.sendMessage({ from: "content", data: "getScreen" })
+}
+
 async function writeToClipboard(text) {
-  try {
-    await navigator.clipboard.writeText(text)
-    console.log("writing to clipboard", text)
-  } catch (error) {
-    console.log("Error writing to clipboard: " + error.message)
+  messageOtherScript("done")
+
+  if (text != "") {
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch (error) {
+      console.log("Error writing to clipboard: " + error.message)
+    }
+  } else {
+    console.log("No text detected")
   }
+
+  document.body.classList.remove("loadingCursor")
 }
