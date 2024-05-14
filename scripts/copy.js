@@ -1,4 +1,4 @@
-activated = false
+let activated = false
 let currentList = null
 
 const button = document.getElementById("copyButton")
@@ -17,16 +17,14 @@ function messageContentScript(key, message) {
       tabs[0].id,
       { from: "popup", [key]: message },
       function (response) {
-        console.log("sent message to content script", response)
+        window.close()
       }
     )
   })
-  console.log("sending to content script")
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.from == "content" && request.data == "done") {
-    console.log("message recieved: done")
     activated = false
   } else if (request.from == "background" && request.data == "shortcut") {
     activateExtension()
@@ -71,11 +69,8 @@ function store(key, value) {
 async function load(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get([key], function (response) {
-      console.log(response)
       if (response[key] != undefined) {
         currentList = response.cb.data
-        console.log(currentList)
-
         updateListItems(currentList)
 
         resolve(response[key])
@@ -94,24 +89,25 @@ function updateStorage(newValue) {
   })
 }
 
-document.addEventListener("DOMContentLoaded", clearList, false)
+document.addEventListener(
+  "DOMContentLoaded",
+  function clearList() {
+    document.getElementById("clearButton").addEventListener("click", () => {
+      store("cb", { data: [] })
+      load("cb")
 
-function clearList() {
-  document.getElementById("clearButton").addEventListener("click", () => {
-    console.log("button clicked")
-    store("cb", { data: [] })
-    load("cb")
-
-    const list = document.getElementById("clipboard")
-    list.replaceChildren()
-  })
-}
+      const list = document.getElementById("clipboard")
+      list.replaceChildren()
+    })
+  },
+  false
+)
 
 let saveForm = document.getElementById("saveForm")
-
 saveForm.addEventListener("submit", (e) => {
-  // e.preventDefault()
+  e.preventDefault()
   const input = document.getElementById("saveInput").value
+  saveForm.reset()
 
   if (input != "") {
     updateStorage(input)
@@ -119,16 +115,38 @@ saveForm.addEventListener("submit", (e) => {
 })
 
 document.addEventListener("DOMContentLoaded", function () {
-  while (true) {
-    let copyButtons = document.getElementsByClassName("saveToClipboard")
-    for (let i = 0; i < copyButtons.length; i++) {
-      console.log(copyButtons[i])
-      copyButtons[i].addEventListener("click", () => {
-        let value = copyButtons[i].parentElement.querySelector("h3").textContent
-        console.log("Value:", value)
+  let copyButtonsContainer = document.getElementById("clipboard")
 
-        messageContentScript("message", value)
-      })
+  copyButtonsContainer.addEventListener("click", function (event) {
+    if (event.target.classList.contains("saveToClipboard")) {
+      let value = event.target.parentElement.querySelector("h3").textContent
+      writeToClipboard(value)
     }
+  })
+})
+
+async function writeToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch (error) {
+    console.log("Error writing to clipboard: " + error.message)
   }
+}
+
+let invisible = true
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("aboutButton").addEventListener("click", () => {
+    const aboutPage = document.getElementById("modal")
+    const clearButton = document.getElementById("clearButton")
+
+    if (invisible) {
+      aboutPage.classList.remove("invisible")
+      clearButton.classList.add("invisible")
+      invisible = false
+    } else {
+      aboutPage.classList.add("invisible")
+      clearButton.classList.remove("invisible")
+      invisible = true
+    }
+  })
 })

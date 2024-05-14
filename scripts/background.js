@@ -10,13 +10,9 @@ chrome.commands.onCommand.addListener((command) => {
   }
 })
 
-// Initialize clipboard
-// store("cb", { data: [] })
-
 load("cb").then(function () {
   if (currentCb == undefined) {
     store("cb", currentCb)
-    console.log("new client")
   }
 })
 
@@ -26,13 +22,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     message.data != "done" &&
     message.data != "getScreen"
   ) {
-    console.log("cropped uri recieved:")
-    console.log(message.data)
-
     screenshotUri = message.data
     ;(async function () {
       currentCopiedText = await getText(screenshotUri)
-      console.log("text: ", currentCopiedText)
       messageContentScript("text", currentCopiedText)
 
       if (currentCopiedText != "") {
@@ -42,8 +34,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   } else if (message.from == "content" && message.data == "getScreen") {
     let capture = chrome.tabs.captureVisibleTab({ format: "png" })
     capture.then((uri) => {
-      console.log("URI:", uri)
-
       messageContentScript("uri", uri)
     })
   }
@@ -79,7 +69,6 @@ async function getText(imageBase64) {
     const response = await fetch(url, requestOptions)
     const result = await response.text()
     const text = JSON.parse(result).ParsedResults[0].ParsedText
-    console.log(result)
     return text
   } catch (error) {
     console.log("error", error)
@@ -93,7 +82,6 @@ function messageContentScript(key, message) {
       tabs[0].id,
       { from: "background", [key]: message },
       function (response) {
-        console.log("sent message to content script", response)
         messageSent = false
       }
     )
@@ -115,7 +103,6 @@ function store(key, value) {
 async function load(key) {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get([key], function (response) {
-      console.log(response)
       if (response[key] != undefined) {
         currentCb = response[key]
         resolve(response[key])
@@ -132,8 +119,3 @@ function updateStorage(newValue) {
     store("cb", currentCb)
   })
 }
-
-// setInterval(() => {
-//   console.log(currentCb)
-//   load("cb")
-// }, 500)

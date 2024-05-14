@@ -16,22 +16,24 @@
         </div>
       </a>
 
-      <button class="navicon">
+      <button id="aboutButton" class="navicon" alt="info">
         <img class="naviconimg" src="/icons/menu.svg" alt="info" />
       </button>
     </div>
-
     <hr />
 
-    <div id="scrollbar" class="scrollSection">
+    <div class="scrollSection scrollbar">
       <div>
         <h2>Copy</h2>
         <hr />
-
         <div class="copy">
-          <button id="copyButton" class="coloredButton">
-            <h1 class="copyText">Select from webpage</h1>
+          <button
+            id="copyButton"
+            class="btn btn-moving-gradient btn-moving-gradient--blue"
+          >
+            Select from webpage
           </button>
+
           <p><span class="bold">Shortcut:</span> Ctrl + Shift + S</p>
         </div>
       </div>
@@ -43,15 +45,69 @@
       </div>
 
       <form type="text" class="saveText" action="" id="saveForm">
-        <input type="text" id="saveInput" maxlength="1000" placeholder="Save to clipboard" />
+        <input
+          type="text"
+          id="saveInput"
+          maxlength="1000"
+          placeholder="Save to clipboard"
+        />
         <input id="saveButton" type="submit" value="Save" />
       </form>
 
       <div id="clipboard">
-        <!-- <div class="listItem">
-          <h3>text test</h3>
+        <div class="listItem">
+          <h3>Initalize content</h3>
           <button class="whiteButton">Copy</button>
-        </div> -->
+        </div>
+      </div>
+    </div>
+
+    <div id="modal" class="infoPage invisible scrollbar">
+      <div>
+        <h2>About</h2>
+        <hr />
+
+        <p class="text">
+          Enables you to copy text to clipboard from anything. This includes
+          images, videos, and copy-blocked pages and documents.
+        </p>
+        <p class="text">
+          Also allows you to acess past copy history and manually save text to a
+          virtual clipboard.
+        </p>
+        <p class="text">
+          Data is synchronized across all browsers that you are logged in to,
+          letting you quickly save/transfer links, bookmarks and other info
+          across devices.
+        </p>
+      </div>
+
+      <div>
+        <hr />
+        <h2>Instructions</h2>
+        <hr />
+
+        <p class="text bold">Copying</p>
+
+        <p class="text">
+          Click the "Select from webpage" button or use Ctrl + Shift + S to
+          activate the scanner. Drag your cursor over the area you want to copy.
+          The text will automatically be copied.
+        </p>
+
+        <p class="text">If the result has errors, zoom in and try again.</p>
+
+        <br />
+        <p class="text bold">Virtual Clipboard</p>
+
+        <p class="text">
+          Use the "Save to clipboard" field to manually save text.
+        </p>
+
+        <p class="text">
+          Use the "Clear" button to delete your saved data from all browser
+          instances.
+        </p>
       </div>
     </div>
 

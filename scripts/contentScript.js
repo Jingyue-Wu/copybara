@@ -1,5 +1,3 @@
-console.log("CONTENT SCRIPT INJECTED")
-
 let screenshotUri = null
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -7,15 +5,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
   // Receive command to activate area selection with cursor from popup
   if (request.from == "popup" && request.message == "getCoordinates") {
-    console.log("message recieved:")
-    console.log(request.message)
     getCursor()
-  }
-
-  // Recieve command to manually write to clipboard
-  else if (request.from == "popup") {
-    console.log("im gonna put into clipboard now: " + request.message)
-    writeToClipboard(request.message)
   }
 
   // Receive activate comand via shortcut
@@ -23,19 +13,16 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     request.from == "background" &&
     request.message == "shortcutGetCoordinates"
   ) {
-    console.log("test")
     getCursor()
   }
 
   // Receive uri from background
   else if (request.from == "background" && request.uri != undefined) {
-    console.log(request.uri)
     screenshotUri = request.uri
   }
 
   // Receive OCR text from background
   else if (request.from == "background") {
-    console.log("RECIEVED OCR TEXT")
     writeToClipboard(request.text)
   }
 
@@ -45,10 +32,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 function getCursor() {
   let windowWidth = window.innerWidth / window.devicePixelRatio
   let windowHeight = window.innerHeight / window.devicePixelRatio
-
-  setInterval(() => {
-    console.log(canvas.width, canvas.height, window.devicePixelRatio)
-  }, 1000)
 
   const canvas = document.createElement("canvas")
   const context = canvas.getContext("2d")
@@ -141,11 +124,8 @@ function getCursor() {
 
       document.documentElement.removeChild(canvas)
 
-      console.log("sending message to background...")
-
       crop(screenshotUri, data)
 
-      // document.body.style.cursor = "wait"
       document.body.classList.add("loadingCursor")
     }
   }
@@ -156,21 +136,12 @@ function getCursor() {
 }
 
 function messageOtherScript(message) {
-  chrome.runtime.sendMessage(
-    { from: "content", data: message },
-    function (response) {
-      console.log(response.message)
-    }
-  )
+  chrome.runtime.sendMessage({ from: "content", data: message })
 }
 
 function crop(uri, data) {
   const screenshotCanvas = document.createElement("canvas")
   const context = screenshotCanvas.getContext("2d")
-
-  // get coordinates of crop
-
-  console.log(data)
 
   let image = new Image()
   image.src = uri
@@ -203,8 +174,6 @@ function crop(uri, data) {
     )
 
     let baseUrl = screenshotCanvas.toDataURL("image/jpeg")
-    console.log("CROPPED SUCCESSFULLY: ")
-    console.log(baseUrl)
 
     messageOtherScript(baseUrl)
   }
@@ -220,7 +189,6 @@ async function writeToClipboard(text) {
   if (text != "") {
     try {
       await navigator.clipboard.writeText(text)
-      console.log("writing to clipboard", text)
     } catch (error) {
       console.log("Error writing to clipboard: " + error.message)
     }
@@ -228,6 +196,5 @@ async function writeToClipboard(text) {
     console.log("No text detected")
   }
 
-  // document.body.style.cursor = "default"
   document.body.classList.remove("loadingCursor")
 }
