@@ -75,6 +75,11 @@ async function load(key) {
 
         resolve(response[key])
       } else {
+        store("cb", { data: [] })
+        load("cb")
+        const list = document.getElementById("clipboard")
+        list.replaceChildren()
+
         reject()
       }
     })
