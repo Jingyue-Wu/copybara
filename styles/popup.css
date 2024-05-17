@@ -145,7 +145,6 @@ button {
   border-radius: 8px;
   padding: 2px 16px;
   color: #8f55d9;
-  box-shadow: #d7b8ff 0px 0.5px 6px 0px;
 }
 
 .whiteButton:hover {
@@ -175,7 +174,6 @@ button {
   border: none;
   border-radius: 8px;
   padding: 4px 24px;
-  box-shadow: #d7b8ff 0px 0.5px 6px 0px;
 }
 
 #clearButton:hover {
@@ -219,7 +217,6 @@ button {
   padding: 2px 16px;
   color: white;
   cursor: pointer;
-  box-shadow: #d7b8ff 0px 0.5px 6px 0px;
 }
 
 #saveButton:hover {
@@ -273,6 +270,7 @@ input:focus {
 .btn:hover .btn-slide-show-text1 {
   margin-left: 65px;
 }
+
 .btn-moving-gradient {
   height: 42px;
   width: 200px;
@@ -285,11 +283,14 @@ input:focus {
   border: none;
   background-size: 300% 100%;
 }
+
 .btn-moving-gradient:hover {
   transition: all 0.4s ease-in-out 0s;
   background-position: 100% 0px;
 }
+
 .btn-moving-gradient--blue {
-  background-image: linear-gradient(90deg, #a562fc, #8f55d9, #a562fc, #8f55d9);
+  background-image: linear-gradient(90deg, #a562fc, #8f55d9, #b57cff, #8f55d9);
   box-shadow: #d7b8ff 0px 1px 6px 0px;
+  transition: 0.4s;
 }

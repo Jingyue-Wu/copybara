@@ -156,8 +156,13 @@ function crop(uri, data) {
     sWidth = endX - startX
     sHeight = endY - startY
 
-    screenshotCanvas.width = sWidth
-    screenshotCanvas.height = sHeight
+    if (sWidth < 1 || sHeight < 1) {
+      screenshotCanvas.width = 1
+      screenshotCanvas.height = 1
+    } else {
+      screenshotCanvas.width = sWidth
+      screenshotCanvas.height = sHeight
+    }
 
     context.filter = "brightness(0.9) contrast(1.5)"
 
