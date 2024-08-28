@@ -148,11 +148,7 @@ button {
 }
 
 .whiteButton:hover {
-  background-color: #f6f0fd;
-}
-
-.whiteButton:active {
-  background-color: #e9d8ff;
+  background-color: #fbf7ff;
 }
 
 .footer {

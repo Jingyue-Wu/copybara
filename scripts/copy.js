@@ -43,13 +43,12 @@ function updateListItems(content) {
     listItem.classList.add("listItem")
 
     const text = document.createElement("h3")
-
-    if (value.length > 60) {
-      value = value.substring(0, 60)
-      value = value + "..."
-    }
-
     text.textContent = value
+    text.style.overflow = "hidden"
+    text.style.whiteSpace = "nowrap"
+    text.style.textOverflow = "ellipsis"
+    text.title = value
+
     listItem.appendChild(text)
 
     const button = document.createElement("button")
